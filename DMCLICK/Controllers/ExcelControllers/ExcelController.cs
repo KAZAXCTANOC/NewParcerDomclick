@@ -37,8 +37,8 @@ namespace DMCLICK.Controllers.ExcelControllers
                 foreach (var apartament in apartaments)
                 {
                     sheetCosts.Cells[x, 1].Value = apartament.Cost;
-                    sheetCosts.Cells[x, 2].Value = new Regex("[^0-9 ]").Replace(apartament.CostFotM2, string.Empty);
-                    sheetCosts.Cells[x, 3].Value = new Regex("[^0-9 ]").Replace(apartament.SquareFootage, string.Empty);
+                    sheetCosts.Cells[x, 2].Value = apartament.CostFotM2;
+                    sheetCosts.Cells[x, 3].Value = apartament.SquareFootage;
                     sheetCosts.Cells[x, 4].Value = apartament.Deadline;
                     sheetCosts.Cells[x, 5].Value = apartament.Type;
                     x++;

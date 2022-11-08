@@ -1,5 +1,7 @@
 ﻿using DMCLICK.Controllers;
+using DMCLICK.Controllers.BrusnikaControllers;
 using DMCLICK.Controllers.ExcelControllers;
+using DMCLICK.Controllers.NewtonparkControllers;
 using DMCLICK.Controllers.SeleniumControllers;
 using DMCLICK.Entityes;
 using DMCLICK.StaticFiles;
@@ -67,14 +69,7 @@ namespace DMCLICK
         [STAThread]
         static void Main(string[] args)
         {
-            ShowConsole(); // Show the console window (for Win App projects)
-            Console.WriteLine("Opening window...");
-            InitializeWindows(); // opens the WPF window and waits here
-            Console.WriteLine("Exiting main...");
-
-
-            #region MyRegion
-
+            #region Parcer
             try
             {
                 bool isFirst = true;
@@ -83,34 +78,46 @@ namespace DMCLICK
 
                 foreach (var complex in ComplexUrls.complices)
                 {
+                    if (complex.ComplexName == "Ньютон парк")
+                    {
+                        NewtonparkController newtonparkController = new NewtonparkController(SeleniumController.driver);
+                        newtonparkController.ParceNewtonPark();
+                        continue;
+                    }
+                    if (complex.ComplexName == "ЖК Брусника в Академическом")
+                    {
+                        BrusnikaController brusnikaController = new BrusnikaController();
+                        brusnikaController.Save(brusnikaController.ParceBrusnika());
+                        continue;
+                    }
                     if (complex.ComplexName == "Притяжение ЕКБ")
                     {
                         PritajenieParserController pritajenieParserController = new PritajenieParserController();
                         excelController.WriteDocumet(pritajenieParserController.ParcePritajenie(SeleniumController.driver), complex.ComplexName);
+                        continue;
                     }
-                    else
+
+
+                    SeleniumController.Adress = complex.BaseHref;
+                    SeleniumController.GoToTheNexComplex(isFirst);
+                    SeleniumController.CurrentPage = 0;
+                    isFirst = false;
+                    parsing = true;
+
+                    SeleniumController.CountePages = (SeleniumController.GetCountPages() - 1) * 10;
+
+                    while (parsing)
                     {
-                        SeleniumController.Adress = complex.BaseHref;
-                        SeleniumController.GoToTheNexComplex(isFirst);
-                        SeleniumController.CurrentPage = 0;
-                        isFirst = false;
-                        parsing = true;
 
-                        SeleniumController.CountePages = (SeleniumController.GetCountPages() - 1) * 10;
+                        SeleniumController.OpenApartamentsInThisPage();
 
-                        while (parsing)
-                        {
-
-                            SeleniumController.OpenApartamentsInThisPage();
-
-                            SeleniumController.LoadApartamentsFromPages();
-                            SeleniumController.CloseApartamentsInThisPage();
-                            parsing = SeleniumController.GoToTheTextPage();
-                        }
-
-                        excelController.WriteDocumet(SeleniumController._apartaments, complex.ComplexName);
-                        complex.Apartaments = SeleniumController._apartaments;
+                        SeleniumController.LoadApartamentsFromPages();
+                        SeleniumController.CloseApartamentsInThisPage();
+                        parsing = SeleniumController.GoToTheTextPage();
                     }
+
+                    excelController.WriteDocumet(SeleniumController._apartaments, complex.ComplexName);
+                    complex.Apartaments = SeleniumController._apartaments;
                 }
             }
             catch (Exception e)
@@ -122,7 +129,6 @@ namespace DMCLICK
                 Console.WriteLine(e.Message);
             }
 
-            //excelController.WriteDocumets(complices);
 
             SeleniumController.driver.Quit();
             #endregion

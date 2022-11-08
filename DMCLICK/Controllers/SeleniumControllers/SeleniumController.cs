@@ -30,7 +30,7 @@ namespace DMCLICK.Controllers.SeleniumControllers
         private const string Price = "shortSummary_barePrice";
         private const string CostSymmaryClassName = "shortSummary_barePriceWrapper";
         private const string SeveralApartmentsClassName = "flatSelection_title";
-        private const string ApartamentClassName = "layoutSnippet_layout_href";
+        private const string ApartamentClassName = "wKUgQu";
         private const string PageInMainWindowClassName = "mesVG";
         
         public void GoToTheNexComplex(bool isFirst)
@@ -269,6 +269,7 @@ namespace DMCLICK.Controllers.SeleniumControllers
             ReadOnlyCollection<IWebElement> Apartaments = driver.FindElements(By.ClassName(ApartamentClassName));
             foreach (var Apartament in Apartaments)
             {
+                Thread.Sleep(2000);
                 Apartament.Click();
             }
             Thread.Sleep(5000);
@@ -304,15 +305,16 @@ namespace DMCLICK.Controllers.SeleniumControllers
             return Convert.ToInt32(count);
         }
         public ChromeDriver driver { get; set; }
-        public ChromeDriver LoadStartPage()
+        public ChromeDriver LoadStartPage(string startPageUrl = null)
         {
             Console.WriteLine("Начало открытия драйвера");
             ChromeDriver driver;
             ChromeOptions options = new ChromeOptions();
+            options.BinaryLocation = @"C:\Program Files\Google\Chrome Beta\Application\chrome.exe";
             options.AddArgument("--disable-blink-features=AutomationControlled");
             //options.AddArgument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36");
-            options.AddArgument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36");
-            options.AddArgument("--remote-debugging-port=5552");
+            options.AddArgument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.5060.114 Safari/537.36");
+            options.AddArgument("--remote-debugging-port=6952");
             options.AddArgument("--window-size=1500,920");
             options.AddArguments("--disable-infobars");
             options.AddArgument("--ignore-certificate-errors");
@@ -325,14 +327,24 @@ namespace DMCLICK.Controllers.SeleniumControllers
             driver = new ChromeDriver(service, options);
 
             IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
-            js.ExecuteScript($"window.open('{Adress}{CurrentPage}')");
+
+            if (startPageUrl is null)
+            {
+                js.ExecuteScript($"window.open('{Adress}{CurrentPage}')");
+            }
+            else
+            {
+                js.ExecuteScript($"window.open('{startPageUrl}')");
+            }
+            Thread.Sleep(5000);
 
             ReadOnlyCollection<string> windowHandles = driver.WindowHandles;
             driver.SwitchTo().Window(windowHandles[0]);
             driver.Close();
             driver.SwitchTo().Window(windowHandles[1]);
-
             Thread.Sleep(5000);
+
+
             this.driver = driver;
             Console.WriteLine("Открытие драйвера успешно завершенно !!!");
             return driver;
